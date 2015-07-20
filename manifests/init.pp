@@ -6,6 +6,7 @@
 #
 # - *$url:
 # - *$target: Destination directory
+# - *$purge_target: Purge Destination prior to extraction. Default false
 # - *$checksum: Default value "true"
 # - *$digest_url: Default value undef
 # - *$digest_string: Default value undef
@@ -19,6 +20,7 @@
 # - *$verbose: Default value true
 # - *$strip_components: Default value 0
 # - *$proxy_server: Default value undef
+# - *$user: User used to do the download and the extraction. The final directory will be used by him/her.
 #
 # Example usage:
 #
@@ -45,6 +47,8 @@ define archive (
   $verbose=true,
   $strip_components=0,
   $proxy_server=undef,
+  $purge_target=false,
+  $user=undef,
 ) {
 
   archive::download {"${name}.${extension}":
@@ -60,16 +64,19 @@ define archive (
     follow_redirects => $follow_redirects,
     verbose          => $verbose,
     proxy_server     => $proxy_server,
+    user             => $user,
   }
 
   archive::extract {$name:
     ensure           => $ensure,
     target           => $target,
+    purge            => $purge_target,
     src_target       => $src_target,
     root_dir         => $root_dir,
     extension        => $extension,
     timeout          => $timeout,
     strip_components => $strip_components,
     require          => Archive::Download["${name}.${extension}"],
+    user             => $user,
   }
 }
